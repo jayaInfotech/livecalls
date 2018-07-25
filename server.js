@@ -42,18 +42,24 @@ io.sockets.on('connection', function (client, details) {
                 }
                 else {
                     setTimeout(function () {
-                        ChatModel.find({ id: { $ne: client.id }, isconnected: false }).sort({ createdAt: -1 }).limit(1).then(data => {
-                            if (data.length > 0) {
-                                console.log('createing offer' + JSON.stringify(data));
-                                io.to(data[0].id).emit('createoffer', { id: client.id });
-                            } else {
-                                ChatModel.update({ id: client.id }, { isconnected: true }, function (err, model) {
-                                    var videos = fs.readdirSync(testFolder);
-                                    var index = Math.floor(Math.random() * videos.length);
-                                    console.log('createing offer no user found', index);
-                                    console.log('createing offer no user found', videos[index]);
-                                    client.emit("nouser", { url: videos[index] });                                })
-                            }
+                        ChatModel.findOne({id:client.id}).then(data => {
+                                if(!data.isconnected)
+                                {
+                                    ChatModel.find({ id: { $ne: client.id }, isconnected: false }).sort({ createdAt: -1 }).limit(1).then(data => {
+                                        if (data.length > 0) {
+                                            console.log('createing offer' + JSON.stringify(data));
+                                            io.to(data[0].id).emit('createoffer', { id: client.id });
+                                        } else {
+                                            ChatModel.update({ id: client.id }, { isconnected: true }, function (err, model) {
+                                                var videos = fs.readdirSync(testFolder);
+                                                var index = Math.floor(Math.random() * videos.length);
+                                                console.log('createing offer no user found', index);
+                                                console.log('createing offer no user found', videos[index]);
+                                                client.emit("nouser", { url: videos[index] });                               
+                                             })
+                                        }
+                                    })
+                                }
                         })
                     }, 7000);
                 }
