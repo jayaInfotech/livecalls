@@ -38,7 +38,10 @@ io.sockets.on('connection', function (client, details) {
             ChatModel.find({ id: { $ne: client.id }, isconnected: false }).sort({ createdAt: -1 }).limit(1).then(data => {
                 if (data.length > 0) {
                     console.log('createing offer' + JSON.stringify(data));
-                    io.to(data[0].id).emit('createoffer', { id: client.id });
+                    ChatModel.updateMany({ id: [client.id,data[0].id]}, { isconnected: true }, function (err, model) {
+                        console.log(JSON.stringify(model));
+                        io.to(data[0].id).emit('createoffer', { id: client.id });
+                    })
                 }
                 else {
                     setTimeout(function () {
@@ -48,7 +51,10 @@ io.sockets.on('connection', function (client, details) {
                                     ChatModel.find({ id: { $ne: client.id }, isconnected: false }).sort({ createdAt: -1 }).limit(1).then(data => {
                                         if (data.length > 0) {
                                             console.log('createing offer' + JSON.stringify(data));
-                                            io.to(data[0].id).emit('createoffer', { id: client.id });
+                                            ChatModel.updateMany({ id: client.id,id: data[0].id}, { isconnected: true }, function (err, model) {
+                                                console.log(JSON.stringify(model));
+                                                io.to(data[0].id).emit('createoffer', { id: client.id });
+                                            })
                                         } else {
                                             ChatModel.update({ id: client.id }, { isconnected: true }, function (err, model) {
                                                 var videos = fs.readdirSync(testFolder);
