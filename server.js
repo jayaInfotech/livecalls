@@ -4,11 +4,12 @@ var express = require("express");
 var http = require('http');
 var app = express();
 var server = http.createServer(app);
+var port = 80 ;
 console.log("express", __dirname);
 app.use('/videos', express.static('videos/'));
 mongoose.connect("mongodb://localhost:27017/Online");
-server.listen(7000, function () {
-    console.log('Express server listening on port ' + 7000);
+server.listen(port, function () {
+    console.log('Express server listening on port ' + port);
 });
 var io = socketIO.listen(server);
 var ChatSchema = mongoose.Schema({
@@ -26,9 +27,11 @@ var key = "com.tech.rtcapp";
 const testFolder = './videos/';
 const fs = require('fs');
 
+app.get('/',function(req,res){
+    res.end('hello world');
+})
 
 io.sockets.on('connection', function (client, details) {
-
     token = new Buffer(client.handshake.query.auth_token, 'base64').toString('ascii')
     console.log('details', token);
     package.push(" ");
